@@ -347,6 +347,7 @@
   });
 
   $(document).delegate(rails.inputChangeSelector, 'change.rails', function(e) {
+    if (rails.isRefiredEvent(e)) { return; }
     var link = $(this);
     rails.allowAction(link).done(function(){
       rails.handleRemote(link);
@@ -355,6 +356,7 @@
   });
 
   $(document).delegate(rails.formSubmitSelector, 'submit.rails', function(e) {
+    if (rails.isRefiredEvent(e)) { return; }
     var form = $(this),
       remote = form.data('remote') !== undefined,
       blankRequiredInputs = rails.blankInputs(form, rails.requiredInputSelector),
@@ -364,6 +366,7 @@
 
       // skip other logic when required values are missing or file upload is present
       if (blankRequiredInputs && form.attr("novalidate") === undefined && rails.fire(form, 'ajax:aborted:required', [blankRequiredInputs])) {
+        rails.stopEverything(e);
         return;
       }
 
@@ -384,7 +387,7 @@
       } else {
         // slight timeout so that the submit button gets properly serialized
         setTimeout(function(){ rails.disableFormElements(form); }, 13);
-      
+        rails.refireAfterAsync(e); 
       }
     });
     return false;
